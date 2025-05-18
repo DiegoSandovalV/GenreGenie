@@ -2,4 +2,4 @@ librosa
 matplotlib
 numpy
 Pillow
-tensorflow
+tensorflow[and-cuda]
