@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import gradio as gr
 
-# Constants
 GENRE_LABELS = [
     "blues", "classical", "country", "disco", "hiphop",
     "jazz", "metal", "pop", "reggae", "rock"
@@ -18,7 +17,7 @@ SAMPLE_RATE = 22050
 SEGMENT_DURATION = 3
 IMAGE_SIZE = (130, 128)  
 MODEL_PATH = '/home/diego/GenreGenie/models/best_model.weights.h5'
-TEMP_IMG_PATH = "/home/diego/GenreGenie/test/gradio_segment3.png"
+TEMP_IMG_PATH = "/home/diego/GenreGenie/app/test/gradio_segment.png"
 
 def get_model(input_shape=(130, 128)):
     input_shape = (input_shape[0], input_shape[1], 3)
@@ -60,7 +59,6 @@ def generate_mel_spectrogram(y, sr):
         pad_width = 130 - db_mel.shape[1]
         db_mel = np.pad(db_mel, ((0, 0), (0, pad_width)), mode='constant')
 
-    print(f"[DEBUG] Spectrogram shape after resize: {db_mel.shape}")
     return db_mel
 
 def save_spectrogram_image(spec, save_path):
@@ -74,7 +72,7 @@ def extract_first_segment_and_save_image(audio_path, save_path=TEMP_IMG_PATH):
     segment_len = int(SAMPLE_RATE * SEGMENT_DURATION)
 
     if len(y) < segment_len:
-        raise ValueError("Audio is too short for a full segment")
+        raise ValueError("[ERROR] Audio is too short for a full segment")
 
     segment = y[:segment_len]
     spec = generate_mel_spectrogram(segment, sr)
@@ -98,10 +96,41 @@ model = load_trained_model()
 def predict_genre(audio_path):
     print(f"[DEBUG] Received audio path: {audio_path}")
     try:
-        extract_first_segment_and_save_image(audio_path, TEMP_IMG_PATH)
-        return predict(model, TEMP_IMG_PATH)
+        y, sr = librosa.load(audio_path, sr=SAMPLE_RATE)
+        segment_len = int(SAMPLE_RATE * SEGMENT_DURATION)
+        num_segments = min(len(y) // segment_len, 10)
+
+        if num_segments == 0:
+            raise ValueError("Audio is too short for a full segment")
+
+        predictions = []
+
+        for i in range(num_segments):
+            start = i * segment_len
+            end = start + segment_len
+            segment = y[start:end]
+
+            spec = generate_mel_spectrogram(segment, sr)
+            temp_path = f"/tmp/gradio_segment_{i}.png"
+            save_spectrogram_image(spec, temp_path)
+            pred = predict(model, temp_path)
+            print(f"[DEBUG] Segment {i+1}: Predicted '{pred}'")
+            predictions.append(pred)
+
+        freq = {}
+        for genre in predictions:
+            if genre in freq:
+                freq[genre] += 1
+            else:
+                freq[genre] = 1
+
+        most_common = max(freq.items(), key=lambda x: x[1])[0]
+        print(f"[DEBUG] Final Prediction (Most Frequent): {most_common}")
+        return most_common
+
     except Exception as e:
         return f"Error: {str(e)}"
+
 
 
 gr.Interface(
