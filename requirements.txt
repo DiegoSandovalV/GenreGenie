@@ -4,3 +4,4 @@ numpy
 Pillow
 tensorflow[and-cuda]
 seaborn
+gradio
