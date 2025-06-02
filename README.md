@@ -4,6 +4,10 @@
 
 GenreGenie es un clasificador de géneros musicales basado en el aprendizaje automático. Utiliza un modelo de red neuronal para predecir el género de una canción a partir de sus características de audio.
 
+## Abstract
+
+GenreGenie es un sistema de clasificación automática de géneros musicales que emplea redes neuronales convolucionales (CNN) para identificar el género de una canción a partir de espectrogramas Mel. El modelo fue entrenado con el dataset GTZAN, procesado en segmentos de 3 segundos, y mejorado mediante técnicas de aumentación de datos como audio stretching. Se evaluó con métricas de precisión y pérdida, obteniendo un 92% de precisión en datos de prueba con aumentación, frente a un 74% sin ella. Se desarrolló una interfaz con Gradio para probar el modelo con audios externos, demostrando su capacidad de generalización en la mayoría de los casos.
+
 ## DataSet
 
 El dataset utilizado para entrenar el modelo es el [GTZAN Genre Collection](https://www.kaggle.com/code/dapy15/music-genre-classification#Classifier), que contiene 1000 canciones de 10 géneros diferentes. Cada género tiene 100 canciones de 30 segundos de duración.
@@ -96,20 +100,26 @@ Para evaluar el rendimiento del modelo, se utilizan las siguientes métricas:
 
 - **Accuracy**: Mide la proporción de predicciones correctas sobre el total de predicciones realizadas.
 
+- **Recall**: Mide la capacidad del modelo para identificar correctamente las instancias positivas. Es decir, la proporción de verdaderos positivos sobre el total de positivos reales.
+
 ## Comparación de resultados de los modelos
 
 Se entrenaron 2 modelos, uno con aumentación de datos y otro sin aumentación de datos. A continuación se presentan los resultados de test obtenidos:
 
-| Modelo                   | Accuracy | Loss |
-| ------------------------ | -------- | ---- |
-| Sin aumentación de datos | 0.74     | 0.97 |
-| Con aumentación de datos | 0.92     | 0.81 |
+| Modelo                   | Accuracy | Loss | Recall |
+| ------------------------ | -------- | ---- | ------ |
+| Sin aumentación de datos | 0.74     | 0.97 | 0.74   |
+| Con aumentación de datos | 0.92     | 0.81 | 0.92   |
+
+El modelo con aumentación de datos tiene un mejor rendimiento teniendo un aumento de alrededor del 18% en la precisión en los datos de prueba. Así como también una disminución del 16% en la pérdida y un aumento del 18% en el recall.
+
+### Comparación con el estado del arte
+
+En comparación con el trabajo de Meng [[1]](#referencias), que obtuvo un 71% de precisión con un modelo VGG16 y espectrogramas de 30 segundos, nuestro modelo con aumentación de datos alcanza un 92% de precisión con espectrogramas de 3 segundos. Esto demuestra que la aumentación de datos y la segmentación adecuada pueden mejorar significativamente el rendimiento del modelo.
 
 #### Matriz de confusión
 
 ![ConfusionMatrix](static/confusion_matrix.png)
-
-El modelo con aumentación de datos tiene un mejor rendimiento teniendo un aumento de alrededor del 18% en la precisión en los datos de prueba.
 
 Se puede observar en la matriz de confusión que los géneros que más confunde el modelo son el "disco" con "pop" además de "metal" con "rock". Los cuales son géneros con características similares.
 
