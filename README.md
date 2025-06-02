@@ -1,6 +1,6 @@
 # GenreGenie
 
-## Descripcción
+## Descripción
 
 GenreGenie es un clasificador de géneros musicales basado en el aprendizaje automático. Utiliza un modelo de red neuronal para predecir el género de una canción a partir de sus características de audio.
 
@@ -21,7 +21,7 @@ Los géneros son:
 - Reggae
 - Rock
 
-El data set fue utilizado para generar 10 [espectrogramas](#espectogramas) de 3 segundos de cada canción. Por lo tanto, el dataset contiene 1000 espectrogramas de cada género, lo que da un total de 10,000 espectrogramas.
+El data set fue utilizado para generar 10 [espectrogramas](#espectrogramas) de 3 segundos de cada canción. Por lo tanto, el dataset contiene 1000 espectrogramas de cada género, lo que da un total de 10,000 espectrogramas.
 
 Ejemplos de spectrogramas generados:
 
@@ -42,11 +42,11 @@ Se aplicó un factor de estiramiento de 0.85 y 1.15 a cada canción del dataset 
 
 Se guardaron los espectrogramas generados por la aumentación de datos en una carpeta separada "AugmentedSpectrograms". Lo cual nos permite comparar el rendimiento del modelo con y sin aumentación de datos.
 
-# Espectogramas
+# Espectrogramas
 
 Los espectrogramas son representaciones visuales de la frecuencia y la amplitud de una señal de audio a lo largo del tiempo. En este proyecto, se utilizan espectrogramas para representar las características de audio de las canciones y entrenar el modelo de red neuronal.
 
-### Espectogramas Mel
+### Espectrogramas Mel
 
 Los espectrogramas Mel son una representación de la frecuencia de una señal de audio en la escala Mel, que es una escala logarítmica que se asemeja a la percepción humana del sonido. Esta representación es útil para el reconocimiento de patrones en señales de audio.
 
@@ -62,19 +62,21 @@ Define cuantos datos se toman por segundo. 22050 Hz es un estándar común para 
 
 Define el número de bandas Mel. Las cuales se utilizan para representar la frecuencia de la señal de audio. 128 es un valor comúnmente utilizado que proporciona un buen equilibrio entre la resolución temporal y la frecuencia.
 
-- `Duracion del segmento`: 3 segundos
+- `Duración del segmento`: 3 segundos
 
 Se utilizaron segmentos de igual duración para la extracción de características MFCC y en modelos como CNN y XGBoost. Se observó que la segmentación de datos puede mejorar el rendimiento, especialmente en las CNN [[1]](#referencias).
 
 ## Modelo
 
-Para nuestro modelo se utilizo una arquitectura de CNN basada en la propuesta de Meng [[1]](#referencias). La arquitectura consta de varias capas convolucionales y de agrupamiento, seguidas de capas densas para la clasificación final.
+Para nuestro modelo se utilizó una arquitectura de CNN basada en la propuesta de Meng [[1]](#referencias). La arquitectura consta de varias capas convolucionales y de agrupamiento, seguidas de capas densas para la clasificación final.
 
 Como entrada el modelo recibe un spectograma a color de 128x130 pixeles, y 3 canales de color (RGB).
 
 Se utilizan 3 bloques convolucionales parecidos, que cuentan con:
 
 - **Conv2D**: Capa convolucional que aplica filtros para extraer características espaciales del espectrograma. Cada filtro está diseñado para detectar patrones básicos (como bordes, ciertas texturas o gradientes de color en el espectrograma). Las cuales van aumentando la cantidad de filtros a medida que se avanza en la red, comenzando con 32 filtros y aumentando hasta 128.
+
+- **Kernel Initializer**: Se utiliza el inicializador `he_normal`, que es adecuado para redes neuronales con activaciones ReLU. Que ayuda a inicializar los pesos de las capas convolucionales de manera que se evite el sobreajuste.
 
 - **MaxPooling2D**: Reduce la altura y anchura de los mapas de características a la mitad. Esto tiene como objetivo reducir la dimensionalidad de los datos obteniendo las características más importantes.
 
@@ -84,11 +86,11 @@ Se utilizan 3 bloques convolucionales parecidos, que cuentan con:
 
 ### Optimizador
 
-Para el optimizador se utilizó Adam, que es un algoritmo de optimización que ajusta la tasa de aprendizaje para cada parametro del modelo.
+Para el optimizador se utilizó Adam, que es un algoritmo de optimización que ajusta la tasa de aprendizaje para cada parámetro del modelo.
 
 Para el loss se utilizó `sparse_categorical_crossentropy`, que compara las predicciones del modelo con las etiquetas reales y calcula la pérdida.
 
-## Metricas
+## Métricas
 
 Para evaluar el rendimiento del modelo, se utilizan las siguientes métricas:
 
@@ -109,7 +111,31 @@ Se entrenaron 2 modelos, uno con aumentación de datos y otro sin aumentación d
 
 El modelo con aumentación de datos tiene un mejor rendimiento teniendo un aumento de alrededor del 18% en la precisión en los datos de prueba.
 
-Se puede observar en la matriz de confusión que los géneros que más confunde el modelo son el "disco" con "pop" además de "metal" con "rock". Los cuales son generos con características similares. 
+Se puede observar en la matriz de confusión que los géneros que más confunde el modelo son el "disco" con "pop" además de "metal" con "rock". Los cuales son géneros con características similares.
+
+## Uso con datos externos
+
+Para demostrar el uso del modelo con datos externos, se empleó la librería de [Gradio](https://gradio.app/), que permite crear interfaces de usuario interactivas para modelos de aprendizaje automático.
+
+Se creó una interfaz que permite al usuario cargar un archivo de audio y obtener la predicción del género musical. Para ello, se obtienen los posibles segmentos de 3 segundos del audio, hasta un máximo de 10 segmentos. Luego, se generan los espectrogramas Mel de cada segmento y se realizan las predicciones utilizando el modelo entrenado.
+El modelo devuelve el género musical más probable para cada segmento de audio, junto con la probabilidad asociada a esa predicción. Al final se muestra el género más frecuente entre todos los segmentos analizados.
+
+Se usaron 5 canciones de diferentes géneros para probar el modelo:
+| Canción | Género Real | Género Predicho Sin Aumentación | Género Predicho Con Aumentación |
+| -------------------------------- | ----------- | ------------------------------- | -------------------------------- |
+| Master of Puppets - Metallica | Metal | Metal | Metal |
+| Bad - Michael Jackson | Pop | Pop | Rock |
+| Bop - DaBaby | Hip-Hop | Hip-Hop | Hip-Hop |
+| Vivaldi - Four Seasons | Classical | Classical | Classical |
+| Livin on Love - Alan Jackson | Country | Country | Country |
+
+Aunque los 2 modelos predicen correctamente el género de las canciones, el modelo con aumentación de datos tiene una mayor precisión en la mayoría de los casos. Es importante mencionar que es necesario probar con secciones principales de las canciones, ya que el modelo puede no funcionar correctamente con secciones menos representativas, con falta de sonido o con ruido.
+
+Es posible clasificar géneros musicales utilizando espectrogramas Mel y una arquitectura de red neuronal convolucional. Y aunque la aumentación de datos mejore el rendimiento del modelo en prueba y validación, en casos reales puede no ser tan efectivo. Esto se debe a que al haber realizado la aumentación con las mismas canciones del dataset, el modelo puede haber aprendido patrones específicos de esas canciones que no se repiten en otras canciones de géneros similares.
+
+# Conclusión
+
+La música es un campo complejo, diverso y sumamente subjetivo, por lo que es importante tener en cuenta que los modelos de aprendizaje automático pueden no ser capaces de capturar todos los detalles de la música. En especial cuando se trata de géneros musicales que pueden compartir características similares, lo que puede llevar a confusiones en la clasificación. Llega a ser tan subjetivo que las personas pueden diferir en la clasificación de una misma canción, lo que hace que la tarea de clasificación sea aún más compleja. Y los modelos al ser entrenados con un dataset limitado, etiquetado de manera subjetiva, pueden no ser capaces de generalizar a nuevos datos de manera efectiva.
 
 ## Referencias
 
