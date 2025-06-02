@@ -141,9 +141,9 @@ Se usaron 5 canciones de diferentes géneros para probar el modelo:
 
 Aunque los 2 modelos predicen correctamente el género de las canciones, el modelo con aumentación de datos tiene una mayor precisión en la mayoría de los casos. Es importante mencionar que es necesario probar con secciones principales de las canciones, ya que el modelo puede no funcionar correctamente con secciones menos representativas, con falta de sonido o con ruido.
 
-Es posible clasificar géneros musicales utilizando espectrogramas Mel y una arquitectura de red neuronal convolucional. Y aunque la aumentación de datos mejore el rendimiento del modelo en prueba y validación, en casos reales puede no ser tan efectivo. Esto se debe a que al haber realizado la aumentación con las mismas canciones del dataset, el modelo puede haber aprendido patrones específicos de esas canciones que no se repiten en otras canciones de géneros similares.
-
 # Conclusión
+
+Es posible clasificar géneros musicales utilizando espectrogramas Mel y una arquitectura de red neuronal convolucional. Y aunque la aumentación de datos mejore el rendimiento del modelo en prueba y validación, en casos reales puede no ser tan efectivo. Esto se debe a que al haber realizado la aumentación con las mismas canciones del dataset, el modelo puede haber aprendido patrones específicos de esas canciones que no se repiten en otras canciones de géneros similares.
 
 La música es un campo complejo, diverso y sumamente subjetivo, por lo que es importante tener en cuenta que los modelos de aprendizaje automático pueden no ser capaces de capturar todos los detalles de la música. En especial cuando se trata de géneros musicales que pueden compartir características similares, lo que puede llevar a confusiones en la clasificación. Llega a ser tan subjetivo que las personas pueden diferir en la clasificación de una misma canción, lo que hace que la tarea de clasificación sea aún más compleja. Y los modelos al ser entrenados con un dataset limitado, etiquetado de manera subjetiva, pueden no ser capaces de generalizar a nuevos datos de manera efectiva.
 
