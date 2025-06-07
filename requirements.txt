@@ -5,3 +5,4 @@ Pillow
 tensorflow[and-cuda]
 seaborn
 gradio
+yt_dlp
